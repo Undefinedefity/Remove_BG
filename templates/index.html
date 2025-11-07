@@ -136,6 +136,20 @@
             text-decoration: none;
             font-weight: 600;
         }
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+        .update-log {
+            margin-top: 1rem;
+            padding-left: 1.2rem;
+        }
+        .update-log li {
+            margin-bottom: 0.4rem;
+        }
     </style>
 </head>
 <body>
@@ -179,6 +193,17 @@
             </div>
         </section>
         {% endif %}
+
+        <footer>
+            <p>Author: {{ author_name }} · Version: {{ app_version }} · Last updated: {{ last_updated }}</p>
+            {% if update_history %}
+            <ul class="update-log">
+                {% for item in update_history %}
+                <li><strong>{{ item.date }}</strong> — {{ item.detail }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </footer>
     </main>
     <script>
     (function () {

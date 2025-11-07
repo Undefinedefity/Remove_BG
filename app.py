@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import base64
 import os
+from datetime import date
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse
@@ -26,6 +27,13 @@ from rembg import remove
 app = FastAPI(title="RemoveBG Web")
 templates = Jinja2Templates(directory="templates")
 
+AUTHOR_NAME = "Def"
+APP_VERSION = "v1.0.0"
+UPDATE_HISTORY: List[Dict[str, str]] = [
+    {"date": "2025-11-07", "detail": "Added interactive brush controls for manual refine."},
+    {"date": "2025-11-07", "detail": "Initial FastAPI web UI for removing backgrounds."},
+]
+
 
 def _encode_png(image_bytes: bytes) -> str:
     """Return a data URL for embedding the PNG in HTML."""
@@ -42,9 +50,24 @@ def _to_png_bytes(image_bytes: bytes) -> Tuple[bytes, Tuple[int, int]]:
         return buffer.getvalue(), rgba.size
 
 
+def _base_context() -> Dict[str, Any]:
+    last_updated = UPDATE_HISTORY[0]["date"] if UPDATE_HISTORY else date.today().isoformat()
+    return {
+        "author_name": AUTHOR_NAME,
+        "last_updated": last_updated,
+        "app_version": APP_VERSION,
+        "update_history": UPDATE_HISTORY,
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("index.html", {"request": request, "result_image": None})
+    context = {
+        **_base_context(),
+        "request": request,
+        "result_image": None,
+    }
+    return templates.TemplateResponse("index.html", context)
 
 
 @app.post("/remove", response_class=HTMLResponse)
@@ -65,6 +88,7 @@ async def remove_background(request: Request, file: UploadFile = File(...)) -> H
     original_png_bytes, _ = _to_png_bytes(image_bytes)
     original_data_url = _encode_png(original_png_bytes)
     context: Dict[str, Any] = {
+        **_base_context(),
         "request": request,
         "result_image": result_data_url,
         "file_name": file.filename or "result.png",

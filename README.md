@@ -4,11 +4,11 @@ Simple FastAPI-based web UI for removing image backgrounds using [rembg](https:/
 
 ## Setup
 
-1. Create virtual environment (recommended):
+1. Create conda environment (recommended):
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+conda create -n remove-bg python=3.11 -y
+conda activate remove-bg
 ```
 
 2. Install dependencies:
